@@ -11,55 +11,75 @@
     }
 })('getDomArray', function () {
     /**
-     *  @param element 第一参数
-     *  @param parentElement 第二参数 - 只有第一参数是字符串的情况下才会有效
+     *  @param element 第一参数 - 要获取的元素。
+     *  @param parentElement 第二参数 - 在哪个父节点下获取。
      */
     function getDomArray(element, parentElement) {
         let dom = [];
         let parentDom = document;
         if (parentElement) {
-            // 如果是字符串
-            if (Object.prototype.toString.call(parentElement).slice(8, -1).toLowerCase() === 'string') {
+            if (Object.prototype.toString.call(parentElement).slice(8, -1).toLowerCase() === 'string') { // 如果是字符串
                 parentDom = document.querySelector(parentElement);
-            }
-            // 如果是dom节点(一个元素)    原生的
-            if (parentElement.nodeType === 1) {
+            } else if (parentElement.nodeType === 1) { // 如果是dom节点(一个元素)    原生的
                 parentDom = parentElement;
-            }
-            // 如果是document
-            if (parentElement === document) {
+            } else if (parentElement === document) { // 如果是document
                 parentDom = parentElement;
-            }
-            /*
-             * 如果是dom集合(一组元素)    HtmlCollection(通过getElementsBy系列获取到的)
-             * 如果是dom集合(一组元素)    NodeList(通过querySelectorAll获取到的)
-             * */
-            if (Object.prototype.toString.call(parentElement).slice(8, -1).toLowerCase() === 'htmlcollection' || Object.prototype.toString.call(parentElement).slice(8, -1).toLowerCase() === 'nodelist') {
+            } else if (Object.prototype.toString.call(parentElement).slice(8, -1).toLowerCase() === 'htmlcollection' || Object.prototype.toString.call(parentElement).slice(8, -1).toLowerCase() === 'nodelist') {
+                /*
+                 * 如果是dom集合(一组元素)    HtmlCollection(通过getElementsBy系列获取到的)
+                 * 如果是dom集合(一组元素)    NodeList(通过querySelectorAll获取到的)
+                 * */
                 parentDom = [].slice.call(parentElement)[0];
+            } else {
+                parentDom = null;
             }
         }
+        if (!parentDom) { // 传了父级，但是没获取到父级
+            return [];
+        }
         if (element) {
-            // 如果是字符串
-            if (Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'string') {
-                dom = [].slice.call(parentDom.querySelectorAll(element));
-            }
-            // 如果是dom节点(一个元素)    原生的
-            if (element.nodeType === 1) {
+            if (Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'string') { // 如果是字符串
+                if (parentDom) {
+                    dom = [].slice.call(parentDom.querySelectorAll(element));
+                }
+            } else if (element.nodeType === 1) { // 如果是dom节点(一个元素)    原生的
                 dom = [element];
-            }
-            // 如果是document
-            if (element === document) {
+                if (parentDom) {
+                    if (!isDomParent(parentDom, element)) {
+                        dom = [];
+                    }
+                }
+            } else if (element === document) { // 如果是document
                 dom = [element];
-            }
-            /*
-             * 如果是dom集合(一组元素)    HtmlCollection(通过getElementsBy系列获取到的)
-             * 如果是dom集合(一组元素)    NodeList(通过querySelectorAll获取到的)
-             * */
-            if (Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'htmlcollection' || Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'nodelist') {
+                if (parentDom) {
+                    dom = [];
+                }
+            } else if (Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'htmlcollection' || Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'nodelist') {
+                /*
+                 * 如果是dom集合(一组元素)    HtmlCollection(通过getElementsBy系列获取到的)
+                 * 如果是dom集合(一组元素)    NodeList(通过querySelectorAll获取到的)
+                 * */
                 dom = [].slice.call(element);
+                if (parentDom) {
+                    const dom2 = [];
+                    dom.forEach(function (v) {
+                        if (isDomParent(parentDom, v)) {
+                            dom2.push(v);
+                        }
+                    });
+                    dom = dom2;
+                }
             }
         }
         return dom;
+    }
+
+    function isDomParent(parentDom, elementDom) {
+        let nowDom = elementDom;
+        while (nowDom !== parentDom && nowDom !== null) {
+            nowDom = nowDom.parentNode;
+        }
+        return nowDom === parentDom;
     }
 
     return getDomArray;
