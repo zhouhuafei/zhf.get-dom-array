@@ -39,19 +39,17 @@
         }
         if (element) {
             if (Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'string') { // 如果是字符串
-                if (parentDom) {
-                    dom = [].slice.call(parentDom.querySelectorAll(element));
-                }
+                dom = [].slice.call(parentDom.querySelectorAll(element));
             } else if (element.nodeType === 1) { // 如果是dom节点(一个元素)    原生的
                 dom = [element];
-                if (parentDom) {
+                if (parentElement) {
                     if (!isDomParent(parentDom, element)) {
                         dom = [];
                     }
                 }
             } else if (element === document) { // 如果是document
                 dom = [element];
-                if (parentDom) {
+                if (parentElement) {
                     dom = [];
                 }
             } else if (Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'htmlcollection' || Object.prototype.toString.call(element).slice(8, -1).toLowerCase() === 'nodelist') {
@@ -60,7 +58,7 @@
                  * 如果是dom集合(一组元素)    NodeList(通过querySelectorAll获取到的)
                  * */
                 dom = [].slice.call(element);
-                if (parentDom) {
+                if (parentElement) {
                     const dom2 = [];
                     dom.forEach(function (v) {
                         if (isDomParent(parentDom, v)) {
